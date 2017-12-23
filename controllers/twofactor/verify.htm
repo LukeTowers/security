@@ -1,0 +1,26 @@
+<h2><?= e(Backend\Models\BrandSetting::get('app_tagline')) ?></h2>
+
+<?= Form::open([
+    'data-request' => 'onVerify'
+]) ?>
+
+<div class="form-group text-field horizontal-form october">
+    <!-- 2FA -->
+    <input
+        type="text"
+        name="secret"
+        value=""
+        class="form-control input-icon"
+        placeholder="Authentication code"
+        autocomplete="off"
+        maxlength="255" />
+
+    <!-- Submit Login -->
+    <button type="submit" class="btn btn-primary btn-block login-button">
+        Verify
+    </button>
+</div>
+
+<?= Form::close() ?>
+
+<?= $this->fireViewEvent('backend.auth.extendSigninView') ?>

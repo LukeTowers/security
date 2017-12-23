@@ -1,0 +1,17 @@
+{
+    "name": "adrenth/security",
+    "description": "Security plugin for OctoberCMS",
+    "type": "october-plugin",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Alwin Drenth",
+            "email": "adrenth@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "pragmarx/google2fa": "^2.0",
+        "bacon/bacon-qr-code": "^1.0"
+    }
+}
