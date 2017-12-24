@@ -49,9 +49,13 @@ class Plugin extends PluginBase
             $controller->addViewPath(plugins_path('adrenth/security/controllers/users'));
 
             $controller->addDynamicMethod('onSetupTwoFactorAuthenticationPopup', function () use ($controller) {
-                return $controller->makePartial('google2fa_secret_popup', [
+                return $controller->makePartial('2fa_popup', [
                     'user' => User::findOrFail(Input::get('id'))
                 ]);
+            });
+
+            $controller->addDynamicMethod('onSaveTwoFactorAuthentication', function () {
+                throw new \ValidationException(['secret' => 'Is required']);
             });
         });
 

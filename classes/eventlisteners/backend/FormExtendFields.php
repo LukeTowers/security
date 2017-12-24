@@ -25,8 +25,8 @@ class FormExtendFields
         if ($form->model instanceof User
             && $form->getController() instanceof Users
         ) {
-            $form->addSecondaryTabFields([
-                'google2fa_secret' => [
+            $form->addTabFields([
+                '2fa_setup_button' => [
                     'label' => '',
                     'type' => 'partial',
                     'context' => [

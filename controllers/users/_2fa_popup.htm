@@ -1,0 +1,99 @@
+<?php
+
+use PragmaRX\Google2FA\Google2FA;
+
+$google2fa = new Google2FA();
+
+$prefix = str_pad($user->id, 20, 'X');
+$secretKey = $google2fa->generateSecretKey(32, $prefix);
+
+$qrCodeUrl = $google2fa->getQRCodeGoogleUrl(
+    e(Backend\Models\BrandSetting::get('app_tagline')),
+    $user->email,
+    $secretKey,
+    300
+);
+?>
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="popup" aria-hidden="true">&times;</button>
+    <h4 class="modal-title">Setup Two Factor Authentication</h4>
+</div>
+<div class="modal-body">
+    <?php if (!empty($user->google2fa_secret)): ?>
+    <div class="row">
+        <div class="col-md-12">
+            <p class="text-success"><strong>You have already enabled Two Factor Authentication.</strong>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="row">
+        <div class="col-md-12">
+            <p>Scan the QR-code or use the key for your Authenticator app.</p>
+        </div>
+    </div>
+    <?php endif; ?>
+    <div class="row">
+        <div class="col-md-5">
+            <img src="/plugins/adrenth/security/assets/images/google2-factor.png" width="80%">
+            <hr>
+            <div class="small">
+                <p>This is a list of supported applications:</p>
+                <ul>
+                    <li><a href="https://www.authy.com/" target="_blank" rel="nofollow noopener external">Authy for iOS, Android, Chrome, Mac OS</a></li>
+                    <li><a href="https://apps.getpebble.com/en_US/application/52f1a4c3c4117252f9000bb8" target="_blank" rel="nofollow noopener external">FreeOTP for iOS, Android and Pebble</a></li>
+                    <li><a href="https://itunes.apple.com/us/app/google-authenticator/id388497605?mt=8" target="_blank" rel="nofollow noopener external">Google Authenticator for iOS</a></li>
+                    <li><a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="nofollow noopener external">Google Authenticator for Android</a></li>
+                    <li><a href="https://www.microsoft.com/en-us/store/p/google-authenticator/9wzdncrdnkrf" target="_blank" rel="nofollow noopener external">Google Authenticator (port) on Windows Store</a></li>
+                    <li><a href="https://www.microsoft.com/en-us/store/apps/authenticator/9wzdncrfj3rj" target="_blank" rel="nofollow noopener external">Microsoft Authenticator for Windows Phone</a></li>
+                    <li><a href="https://lastpass.com/auth/" target="_blank" rel="nofollow noopener external">LastPass Authenticator for iOS, Android, Mac OS, Windows</a></li>
+                    <li><a href="https://1password.com" target="_blank" rel="nofollow noopener external">1Password for iOS, Android, Mac OS, Windows</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label class="control-label">Secret key (QR-code)</label>
+                <img src="<?= $qrCodeUrl ?>" width="100%" style="background-color:white; padding:10px; border: 2px dashed #BDC3C7;">
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="form-group">
+                <label class="control-label">Secret key (text)</label>
+                <textarea class="form-control" rows="3" style="font-family: 'Courier New'"><?= $secretKey ?></textarea>
+            </div>
+            <?php if (!empty($user->google2fa_secret)): ?>
+            <div class="form-group is-required">
+                <label class="control-label">Authentication code</label>
+                <input
+                    type="text"
+                    name="secret"
+                    value=""
+                    class="form-control input-icon"
+                    placeholder="Authentication code"
+                    autocomplete="off"
+                    maxlength="255" />
+                <p class="small text-success">Use your authenticator app with your <strong>current</strong> secret key to activate the new one.</p>
+            </div>
+            <?php endif; ?>
+            <input type="hidden" name="TFA[google2fa_secret]" value="<?= $secretKey ?>">
+        </div>
+    </div>
+    <div class="form-buttons">
+        <div class="loading-indicator-container">
+            <button
+                type="submit"
+                data-request="onSaveTwoFactorAuthentication"
+                data-request-confirm="Are you sure? Make sure you have scanned the QR-code into your Authenticator app. After clicking 'OK' Two Factor Authentication is enabled."
+                data-load-indicator="<?= e(trans('backend::lang.form.saving')) ?>"
+                data-request-success="$('.modal').trigger('close.oc.popup');"
+                class="btn btn-primary pull-right">
+                <?php if (empty($user->google2fa_secret)): ?>
+                Enable Two Factor Authentication
+                <?php else: ?>
+                Update Two Factor Authentication
+                <?php endif; ?>
+            </button>
+            <button class="btn btn-default" data-dismiss="popup"><?= e(trans('backend::lang.form.cancel')) ?></button>
+        </div>
+    </div>
+</div>
