@@ -36,8 +36,8 @@ class Plugin extends PluginBase
     public function pluginDetails(): array
     {
         return [
-            'name' => 'adrenth.security::lang.plugin.name',
-            'description' => 'adrenth.security::lang.plugin.description',
+            'name' => 'Security',
+            'description' => 'Improves the security of OctoberCMS',
             'author' => 'Alwin Drenth',
             'icon' => 'icon-link',
             'homepage' => 'http://octobercms.com/plugin/adrenth-security',
@@ -59,12 +59,8 @@ class Plugin extends PluginBase
     public function register()
     {
         Users::extend(function (Users $controller) {
-            $controller->addViewPath(plugins_path('adrenth/security/controllers/users'));
-
             $controller->addDynamicMethod('onSetupTwoFactorAuthenticationPopup', function () use ($controller) {
-                return $controller->makePartial('2fa_popup', [
-                    'user' => BackendAuth::getUser()
-                ]);
+                return $controller->makePartial('2fa_popup', ['user' => BackendAuth::getUser()]);
             });
 
             $controller->addDynamicMethod('onSaveTwoFactorAuthentication', function () use ($controller) {
@@ -86,18 +82,5 @@ class Plugin extends PluginBase
                 ];
             });
         });
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function registerPermissions(): array
-    {
-        return [
-            'adrenth.security.access_redirects' => [
-                'label' => 'adrenth.security::lang.permission.access_redirects.label',
-                'tab' => 'adrenth.security::lang.permission.access_redirects.tab',
-            ],
-        ];
     }
 }
