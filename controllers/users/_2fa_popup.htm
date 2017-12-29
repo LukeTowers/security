@@ -19,6 +19,7 @@ $qrCodeUrl = $google2fa->getQRCodeGoogleUrl(
     <h4 class="modal-title">Setup Two Factor Authentication</h4>
 </div>
 <div class="modal-body">
+    <?= Form::open() ?>
     <?php if (!empty($user->google2fa_secret)): ?>
     <div class="row">
         <div class="col-md-12">
@@ -59,17 +60,18 @@ $qrCodeUrl = $google2fa->getQRCodeGoogleUrl(
         <div class="col-md-3">
             <div class="form-group">
                 <label class="control-label">Secret key (text)</label>
-                <textarea class="form-control" rows="3" style="font-family: 'Courier New'"><?= $secretKey ?></textarea>
+                <textarea class="form-control" rows="3" style="font-family: 'Courier New'" readonly><?= $secretKey ?></textarea>
+                <input type="hidden" name="secret" value="<?= $secretKey ?>">
             </div>
             <?php if (!empty($user->google2fa_secret)): ?>
             <div class="form-group is-required">
                 <label class="control-label">Authentication code</label>
                 <input
                     type="text"
-                    name="secret"
+                    name="key"
                     value=""
                     class="form-control input-icon"
-                    placeholder="Authentication code"
+                    placeholder="Authentication key"
                     autocomplete="off"
                     maxlength="255" />
                 <p class="small text-success">Use your authenticator app with your <strong>current</strong> secret key to activate the new one.</p>
@@ -96,4 +98,5 @@ $qrCodeUrl = $google2fa->getQRCodeGoogleUrl(
             <button class="btn btn-default" data-dismiss="popup"><?= e(trans('backend::lang.form.cancel')) ?></button>
         </div>
     </div>
+    <?= Form::close() ?>
 </div>

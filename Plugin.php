@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace Adrenth\Security;
 
 use Adrenth\Security\Classes\EventSubscribers\BackendEventSubscriber;
-use Backend\Controllers\Auth;
 use Backend\Controllers\Users;
 use Backend\Models\User;
-use Config;
+use BackendAuth;
 use Event;
-use Illuminate\Http\Request;
 use Input;
-use Route;
+use PragmaRX\Google2FA\Google2FA;
 use System\Classes\PluginBase;
+use ValidationException;
 
 /**
  * Class Plugin
@@ -22,6 +21,8 @@ use System\Classes\PluginBase;
  */
 class Plugin extends PluginBase
 {
+    const SESSION_KEY = 'adrenth.security.2fa';
+
     /**
      * This plugin should have elevated privileges.
      *
@@ -43,23 +44,48 @@ class Plugin extends PluginBase
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function boot()
+    {
+        Event::subscribe(BackendEventSubscriber::class);
+    }
+
+    /**
+     * {@inheritdoc}
+     * @throws ValidationException
+     */
+    public function register()
     {
         Users::extend(function (Users $controller) {
             $controller->addViewPath(plugins_path('adrenth/security/controllers/users'));
 
             $controller->addDynamicMethod('onSetupTwoFactorAuthenticationPopup', function () use ($controller) {
                 return $controller->makePartial('2fa_popup', [
-                    'user' => User::findOrFail(Input::get('id'))
+                    'user' => BackendAuth::getUser()
                 ]);
             });
 
-            $controller->addDynamicMethod('onSaveTwoFactorAuthentication', function () {
-                throw new \ValidationException(['secret' => 'Is required']);
+            $controller->addDynamicMethod('onSaveTwoFactorAuthentication', function () use ($controller) {
+                /** @var User $user */
+                $user = BackendAuth::getUser();
+                $currentSecret = (string) $user->getAttribute('google2fa_secret');
+
+                if ($currentSecret !== ''
+                    && !(new Google2FA())->verifyKey($currentSecret, Input::get('key'))
+                ) {
+                    throw new ValidationException(['secret' => 'Invalid secret provided. Try again.']);
+                }
+
+                $user->setAttribute('google2fa_secret', Input::get('secret'));
+                $user->save();
+
+                return [
+                    '#Form-field-User-2fa_setup_button-group' => $controller->makePartial('2fa_setup_button')
+                ];
             });
         });
-
-        Event::subscribe(BackendEventSubscriber::class);
     }
 
     /**

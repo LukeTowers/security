@@ -20,8 +20,6 @@ class FormExtendFields
      */
     public function handle(Form $form): void
     {
-        // TODO: Check whether 2fa is enabled or not
-
         if ($form->model instanceof User
             && $form->getController() instanceof Users
         ) {

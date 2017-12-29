@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Adrenth\Security\Classes\EventListeners\Backend;
 
 use Adrenth\Security\Controllers\TwoFactor;
+use Adrenth\Security\Plugin;
 use Backend;
 use Backend\Classes\Controller;
 use BackendAuth;
+use Hash;
 use Session;
 
 /**
@@ -27,11 +29,25 @@ class PageBeforeDisplay
         }
 
         if (!BackendAuth::check()) {
+            Session::forget(Plugin::SESSION_KEY);
             return;
         }
 
-        if (Session::has('adrenth.securiry.2fa')) {
+        /** @var Backend\Models\User $user */
+        $user = BackendAuth::getUser();
+
+        $secret = (string) $user->getAttribute('google2fa_secret');
+
+        if ($secret === '') {
             return;
+        }
+
+        if (Session::has(Plugin::SESSION_KEY)) {
+            if (!Hash::check($secret, Session::get(Plugin::SESSION_KEY))) {
+                Session::forget(Plugin::SESSION_KEY);
+            } else {
+                return;
+            }
         }
 
         Backend::redirect('adrenth/security/twofactor/verify')->send();
