@@ -59,6 +59,8 @@ class Plugin extends PluginBase
     public function register()
     {
         Users::extend(function (Users $controller) {
+            $controller->addViewPath(plugins_path('adrenth/security/controllers/users'));
+
             $controller->addDynamicMethod('onSetupTwoFactorAuthenticationPopup', function () use ($controller) {
                 return $controller->makePartial('2fa_popup', ['user' => BackendAuth::getUser()]);
             });
