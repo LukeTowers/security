@@ -72,7 +72,7 @@ class TwoFactor extends Controller
             return redirect(Backend::url('/'));
         }
 
-        Flash::error('Invalid authentication code.');
+        Flash::error(trans('adrenth.security::lang.2fa.invalid_authentication_code'));
     }
 
     // @codingStandardsIgnoreEnd

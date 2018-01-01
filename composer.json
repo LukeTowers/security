@@ -1,6 +1,6 @@
 {
     "name": "adrenth/security",
-    "description": "Security plugin for OctoberCMS",
+    "description": "Security plugin for October CMS",
     "type": "october-plugin",
     "license": "proprietary",
     "authors": [

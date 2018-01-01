@@ -5,11 +5,11 @@
             data-size="giant"
             data-keyboard="false"
             data-handler="onSetupTwoFactorAuthenticationPopup">
-        Two Factor Authentication settings
+        <?= e(trans('adrenth.security::lang.2fa.2fa_settings')) ?>
     </button>
     <?php if (!empty($user->google2fa_secret)): ?>
-    <p class="help-block" style="color: #0EA804">Two Factor Authentication is enabled for your account.</p>
+    <p class="help-block" style="color: #0EA804"><?= e(trans('adrenth.security::lang.2fa.account_enabled')) ?></p>
     <?php else: ?>
-    <p class="help-block" style="color: #7f1f15">Two Factor Authentication is not enabled for your account.</p>
+    <p class="help-block" style="color: #7f1f15"><?= e(trans('adrenth.security::lang.2fa.account_enabled')) ?></p>
     <?php endif; ?>
 </div>

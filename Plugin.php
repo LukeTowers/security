@@ -36,8 +36,8 @@ class Plugin extends PluginBase
     public function pluginDetails(): array
     {
         return [
-            'name' => 'Security',
-            'description' => 'Improves the security of OctoberCMS',
+            'name' => 'adrenth.security::lang.plugin.name',
+            'description' => 'adrenth.security::lang.plugin.description',
             'author' => 'Alwin Drenth',
             'icon' => 'icon-link',
             'homepage' => 'http://octobercms.com/plugin/adrenth-security',
@@ -73,7 +73,7 @@ class Plugin extends PluginBase
                 if ($currentSecret !== ''
                     && !(new Google2FA())->verifyKey($currentSecret, Input::get('key'))
                 ) {
-                    throw new ValidationException(['secret' => 'Invalid secret provided. Try again.']);
+                    throw new ValidationException(['secret' => trans('adrenth.security::lang.2fa.invalid_secret')]);
                 }
 
                 $user->setAttribute('google2fa_secret', Input::get('secret'));
