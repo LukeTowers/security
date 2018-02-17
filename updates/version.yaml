@@ -1,3 +1,6 @@
 1.0.1:
     - First version of Adrenth.Security
     - 20171220_0001_add_google2fa_secret_to_backend_users_table.php
+1.0.2:
+    - Modify secret key to be encrypted within the database.
+    - 20180217_0001_modify_google2fa_secret_type.php

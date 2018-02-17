@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace Adrenth\Security;
 
 use Adrenth\Security\Classes\EventSubscribers\BackendEventSubscriber;
+use Adrenth\Security\Classes\TwoFactorAuthentication\SecretKey;
+use Adrenth\Security\Classes\TwoFactorAuthentication\TwoFactorAuthentication;
+use Adrenth\Security\ServiceProviders\TwoFactorAuthenticationProvider;
 use Backend\Controllers\Users;
 use Backend\Models\User;
 use BackendAuth;
 use Event;
 use Input;
-use PragmaRX\Google2FA\Google2FA;
 use System\Classes\PluginBase;
 use ValidationException;
 
@@ -58,6 +60,8 @@ class Plugin extends PluginBase
      */
     public function register()
     {
+        $this->registerServiceProviders();
+
         Users::extend(function (Users $controller) {
             $controller->addViewPath(plugins_path('adrenth/security/controllers/users'));
 
@@ -68,15 +72,18 @@ class Plugin extends PluginBase
             $controller->addDynamicMethod('onSaveTwoFactorAuthentication', function () use ($controller) {
                 /** @var User $user */
                 $user = BackendAuth::getUser();
-                $currentSecret = (string) $user->getAttribute('google2fa_secret');
 
-                if ($currentSecret !== ''
-                    && !(new Google2FA())->verifyKey($currentSecret, Input::get('key'))
-                ) {
+                /** @var SecretKey $secretKey */
+                $secretKey = resolve(SecretKey::class);
+                $currentSecret = $secretKey->decrypt((string) $user->getAttribute('google2fa_secret'));
+
+                /** @var TwoFactorAuthentication $twoFactorAuthentication */
+                $twoFactorAuthentication = resolve(TwoFactorAuthentication::class);
+                if ($currentSecret !== '' && !$twoFactorAuthentication->verifyKey($currentSecret, Input::get('key'))) {
                     throw new ValidationException(['secret' => trans('adrenth.security::lang.2fa.invalid_secret')]);
                 }
 
-                $user->setAttribute('google2fa_secret', Input::get('secret'));
+                $user->setAttribute('google2fa_secret', $secretKey->encrypt(Input::get('secret')));
                 $user->save();
 
                 return [
@@ -84,5 +91,13 @@ class Plugin extends PluginBase
                 ];
             });
         });
+    }
+
+    /**
+     * @return void
+     */
+    private function registerServiceProviders(): void
+    {
+        $this->app->register(TwoFactorAuthenticationProvider::class);
     }
 }
