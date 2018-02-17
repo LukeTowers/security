@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Adrenth\Security\Controllers;
 
+use Adrenth\Security\Classes\TwoFactorAuthentication\SecretKey;
+use Adrenth\Security\Classes\TwoFactorAuthentication\TwoFactorAuthentication;
 use Adrenth\Security\Plugin;
 use Backend;
 use Backend\Classes\Controller;
@@ -13,7 +15,6 @@ use Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Input;
-use PragmaRX\Google2FA\Google2FA;
 use RuntimeException;
 use Session;
 
@@ -63,11 +64,14 @@ class TwoFactor extends Controller
 
         /** @var Backend\Models\User $user */
         $user = BackendAuth::getUser();
-        $userSecret = $user->getAttribute('google2fa_secret');
 
-        $google2fa = new Google2FA();
+        /** @var SecretKey $secretKey */
+        $secretKey = resolve(SecretKey::class);
+        $userSecret = $secretKey->decrypt((string) $user->getAttribute('google2fa_secret'));
 
-        if ($google2fa->verifyKey($userSecret, Input::get('key'))) {
+        /** @var TwoFactorAuthentication $twoFactorAuthentication */
+        $twoFactorAuthentication = resolve(TwoFactorAuthentication::class);
+        if ($twoFactorAuthentication->verifyKey($userSecret, Input::get('key'))) {
             Session::put(Plugin::SESSION_KEY, Hash::make($userSecret));
             return redirect(Backend::url('/'));
         }

@@ -1,13 +1,13 @@
 <?php
 
-use PragmaRX\Google2FA\Google2FA;
+use Adrenth\Security\Classes\TwoFactorAuthentication\TwoFactorAuthentication;
 
-$google2fa = new Google2FA();
+$twoFactorAuthentication = resolve(TwoFactorAuthentication::class);
 
 $prefix = str_pad($user->id, 20, 'X');
-$secretKey = $google2fa->generateSecretKey(32, $prefix);
+$secretKey = $twoFactorAuthentication->generateSecretKey(32, $prefix);
 
-$qrCodeUrl = $google2fa->getQRCodeGoogleUrl(
+$qrCodeUrl = $twoFactorAuthentication->getQRCodeUrl(
     e(Backend\Models\BrandSetting::get('app_tagline')),
     $user->email,
     $secretKey,

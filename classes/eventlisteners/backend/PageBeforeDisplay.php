@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Adrenth\Security\Classes\EventListeners\Backend;
 
+use Adrenth\Security\Classes\TwoFactorAuthentication\SecretKey;
 use Adrenth\Security\Controllers\TwoFactor;
 use Adrenth\Security\Plugin;
 use Backend;
@@ -36,8 +37,9 @@ class PageBeforeDisplay
         /** @var Backend\Models\User $user */
         $user = BackendAuth::getUser();
 
-        $secret = (string) $user->getAttribute('google2fa_secret');
-
+        /** @var SecretKey $secretKey */
+        $secretKey = resolve(SecretKey::class);
+        $secret = $secretKey->decrypt((string) $user->getAttribute('google2fa_secret'));
         if ($secret === '') {
             return;
         }
